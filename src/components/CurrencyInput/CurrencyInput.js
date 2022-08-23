@@ -8,6 +8,7 @@ function CurrencyInput({ key, amount, currency, currencies, onAmountChange, onCu
     <div key={key} className="group">
       <input
         type="text"
+        maxLength={6}
         value={amount}
         onChange={(event) => onAmountChange(event.target.value)}
       />

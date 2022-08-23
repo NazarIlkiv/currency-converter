@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Header from "./components/Header/Header";
 import CurrencyInput from "./components/CurrencyInput/CurrencyInput";
 import axios from "axios";
-import Icon from './money.png';
+import Icon from "./money.png";
 import "./App.css";
 
 function App() {
@@ -15,69 +15,64 @@ function App() {
 
   useEffect(() => {
     axios
-        .get(
-          "https://v6.exchangerate-api.com/v6/ddc00136a0ad70eb8e7974cb/latest/USD"
+      .get(
+        "https://v6.exchangerate-api.com/v6/2698922fcd9fceb151131b30/latest/USD"
       )
       .then((response) => setRates(response.data.conversion_rates));
   }, []);
 
   useEffect(() => {
     axios
-        .get(
-          "https://v6.exchangerate-api.com/v6/ddc00136a0ad70eb8e7974cb/latest/EUR"
+      .get(
+        "https://v6.exchangerate-api.com/v6/2698922fcd9fceb151131b30/latest/EUR"
       )
       .then((response) => setEurRate(response.data.conversion_rates));
   }, []);
 
   useEffect(() => {
-    if (!!rates) handleAmount1Change(1);
+    if (!!rates) setAmount1(1);
+    getCalculatedAmount(amount1, setAmount1, setAmount2, currency1, currency2);
   }, [rates]);
 
   const format = (number) => number.toFixed(2);
 
-  function handleAmount1Change(amount1) {
-    console.log(typeof(amount1, '1'));
-    setAmount2(format(amount1 * rates[currency2] / rates[currency1]));
-    setAmount1(amount1);
-  }
-
-  function handleCurrency1Change(currency1) {
-    console.log(typeof(amount1, '1'));
-    setAmount2(format(amount1 * rates[currency2] / rates[currency1]));
-    setCurrency1(currency1);
-    console.log(typeof(amount1, '1'));
-  }
-
-  function handleAmount2Change(amount2) {
-    setAmount1(format(amount2 * rates[currency1] / rates[currency2]));
-    setAmount2(amount2);
-  }
-
-  function handleCurrency2Change(currency2) {
-    setAmount1(format(amount2 * rates[currency1] / rates[currency2]));
-    setCurrency2(currency2);
-  }
+  const getCalculatedAmount = (value, setValue1, setValue2, curr1, curr2) => {
+    setValue2(format((value * rates[curr2]) / rates[curr1]));
+    setValue1(value);
+  };
 
   return (
     <>
-      <Header USDRate={rates['UAH']} EURRate={eurRate['UAH']} />
+      <Header USDRate={rates["UAH"]} EURRate={eurRate["UAH"]} />
       <div className="wrapper">
-        <img src={Icon} alt='money icon'></img>
+        <img src={Icon} alt="money icon"></img>
         <CurrencyInput
-           key={1}
-           onAmountChange={handleAmount1Change}
-           onCurrencyChange={handleCurrency1Change}
-           currencies={Object.keys(rates)}
-           amount={amount1}
-           currency={currency1} />
+          key={1}
+          onAmountChange={(e) =>
+            getCalculatedAmount(e, setAmount1, setAmount2, currency1, currency2)
+          }
+          onCurrencyChange={(e) => {
+            setCurrency1(e);
+            getCalculatedAmount(amount1, setAmount1, setAmount2, e, currency2);
+          }}
+          currencies={Object.keys(rates)}
+          amount={amount1}
+          currency={currency1}
+        />
         <CurrencyInput
-           key={2}
-           onAmountChange={handleAmount2Change}
-           onCurrencyChange={handleCurrency2Change}
-           currencies={Object.keys(rates)}
-           amount={amount2}
-           currency={currency2} />
-       </div>
+          key={2}
+          onAmountChange={(e) =>
+            getCalculatedAmount(e, setAmount2, setAmount1, currency2, currency1)
+          }
+          onCurrencyChange={(e) => {
+            setCurrency2(e);
+            getCalculatedAmount(amount2, setAmount2, setAmount1, e, currency1);
+          }}
+          currencies={Object.keys(rates)}
+          amount={amount2}
+          currency={currency2}
+        />
+      </div>
     </>
   );
 }
